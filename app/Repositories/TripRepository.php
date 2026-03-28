@@ -151,4 +151,32 @@ class TripRepository
 
         return array_map(fn($row) => $this->mapToTrip($row), $rows);
     }
+
+    /**
+     * Met à jour un trajet
+     */
+    public function update(Trip $trip): bool
+    {
+        $stmt = $this->pdo->prepare("
+            UPDATE trips 
+            SET 
+                departure_agency_id = :dep_agency,
+                arrival_agency_id = :arr_agency,
+                departure_datetime = :dep_dt,
+                arrival_datetime = :arr_dt,
+                total_seats = :total,
+                available_seats = :available
+            WHERE id = :id
+        ");
+
+        return $stmt->execute([
+            'dep_agency' => $trip->getDepartureAgency()->getId(),
+            'arr_agency' => $trip->getArrivalAgency()->getId(),
+            'dep_dt' => $trip->getDepartureDateTime()->format('Y-m-d H:i:s'),
+            'arr_dt' => $trip->getArrivalDateTime()->format('Y-m-d H:i:s'),
+            'total' => $trip->getTotalSeats(),
+            'available' => $trip->getAvailableSeats(),
+            'id' => $trip->getId(),
+        ]);
+    }
 }
